@@ -85,7 +85,8 @@
 			var min = Math.min(game.parent().width(), game.parent().height());
 			game.width(min - 10);
 			game.height(min - 10);
-		}();
+		};
+		resize();
 		$(window).resize(function (e) {
 			resize();
 		});
@@ -93,12 +94,12 @@
 	})();
 	class qiu {
 
-		constructor(x, y, r, a, d) {
+		constructor(x, y, r, right, bottom) {
 			this.x = x || 0;
 			this.y = y || 0;
 			this.r = r || 0;
-			this.a = a || 0;
-			this.d = d || 0;
+			this.right = right || 0;
+			this.bottom = bottom || 0;
 			this.color = "#";
 			for (var i = 0; i < 3; i++) {
 				var num = Math.floor(Math.random() * 256).toString(16);
@@ -116,27 +117,64 @@
 			ctx.fill();
 			ctx.closePath();
 		}
-		getBounds(){
-			return {x:this.x,y:this.y,r:this.r};
+		getBounds() {
+			return {
+				x: this.x,
+				y: this.y,
+				r: this.r
+			};
 		}
-		getStatus(){
-			return {a:this.a,d:this.d};
+		setBounds(e) {
+			this.x = e.x;
+			this.y = e.y;
+			this.r = e.r;
+		}
+		getStatus() {
+			return {
+				right: this.right,
+				bottom: this.bottom
+			};
+		}
+		setStatus(e) {
+			this.right = e.right;
+			this.bottom = e.bottom;
 		}
 	}
-	var ctx=game.getContext("2d");
+	var ctx = game.getContext("2d");
 	var qiuList = [];
-	qiuList.push(new qiu(0, 0, 5));
+	for (var i = 0; i < 20; i++) {
+		qiuList.push(new qiu(Math.random() * 500, Math.random() * 500, 5, Math.random() * 4 - 2, Math.random() * 4 - 2));
+	}
+	qiuList.push(new qiu(250, 250, 5, 1, 1));
 	var drawing = function () {
-		for (let q of qiuList) {
-			q.draw(ctx);
+		for (let i = 0; i < qiuList.length; i++) {
+			if (qiuList[i].delete == true) {
+				qiuList.splice(i--,1);
+				qiuList.push(new qiu(Math.random() * 500, Math.random() * 500, 5, Math.random() * 4 - 2, Math.random() * 4 - 2));
+			} else{
+				qiuList[i].draw(ctx);
+			}
 		}
 	}
 	var render = function () {
-
+		for (let q of qiuList) {
+			var bounds = q.getBounds();
+			var status = q.getStatus();
+			bounds.x += status.right;
+			bounds.y += status.bottom;
+			q.setBounds(bounds);
+			if (bounds.x + bounds.r < 0 || bounds.x - bounds.r > 500 || bounds.y + bounds.r < 0 || bounds.y - bounds.r > 500) {
+				q.delete=true;
+			}
+		}
 	}
 	var re = function () {
+		ctx.fillStyle = "#FFFFFF";
+		ctx.fillRect(0, 0, 500, 500);
 		render();
 		drawing();
+		ctx.strokeStyle = "#000000";
+		ctx.strokeRect(1, 1, 498, 498);
 		requestAnimationFrame(re);
 	}
 	requestAnimationFrame(re);
