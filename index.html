@@ -116,6 +116,12 @@
 			ctx.fill();
 			ctx.closePath();
 		}
+		getBounds(){
+			return {x:this.x,y:this.y,r:this.r};
+		}
+		getStatus(){
+			return {a:this.a,d:this.d};
+		}
 	}
 	var ctx=game.getContext("2d");
 	var qiuList = [];
