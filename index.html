@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript" charset="utf-8"></script>
+	<title>无标题文档</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+
+		html {
+			font-size: 20px;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		body {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		#gameInfo {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			width: 100%;
+		}
+
+		#gameInfo .life {
+			vertical-align: middle;
+			font-size: 1.2rem;
+		}
+
+		#gameInfo .score {
+			font-size: 1.2rem;
+		}
+
+		#gameInfo img {
+			width: 1rem;
+		}
+
+		.cv {
+			flex-grow: 1;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="gameInfo">
+		<div class="life">
+			<img src="img/life.jpg">{{life}}</div>
+		<h1>游戏</h1>
+		<div class="score">{{score}}</div>
+	</div>
+	<div class="cv">
+		<canvas id="game" width="500px" height="500px"></canvas>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript">
+	(function () {
+		var gameInfo = new Vue({
+			el: "#gameInfo",
+			data: {
+				life: 3,
+				score: 0
+			}
+		});
+		var resize = function (e) {
+			var game = $("#game");
+			var min = Math.min(game.parent().width(), game.parent().height());
+			game.width(min - 10);
+			game.height(min - 10);
+		}();
+		$(window).resize(function (e) {
+			resize();
+		});
+
+	})();
+	class qiu {
+
+		constructor(x, y, r, a, d) {
+			this.x = x || 0;
+			this.y = y || 0;
+			this.r = r || 0;
+			this.a = a || 0;
+			this.d = d || 0;
+			this.color = "#";
+			for (var i = 0; i < 3; i++) {
+				var num = Math.floor(Math.random() * 256).toString(16);
+				if (num.length == 1) {
+					this.color += "0" + num;
+				} else {
+					this.color += num;
+				}
+			}
+		}
+		draw(ctx) {
+			ctx.fillStyle = this.color;
+			ctx.beginPath();
+			ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+	var ctx=game.getContext("2d");
+	var qiuList = [];
+	qiuList.push(new qiu(0, 0, 5));
+	var drawing = function () {
+		for (let q of qiuList) {
+			q.draw(ctx);
+		}
+	}
+	var render = function () {
+
+	}
+	var re = function () {
+		render();
+		drawing();
+		requestAnimationFrame(re);
+	}
+	requestAnimationFrame(re);
+
+	function log() {
+		console.log("网页可见区域宽：" + document.body.clientWidth);
+		console.log("网页可见区域高：" + document.body.clientHeight);
+		console.log("网页可见区域宽：" + document.body.offsetWidth);
+		console.log("网页可见区域高：" + document.body.offsetHeight);
+		console.log("网页正文全文宽：" + document.body.scrollWidth);
+		console.log("网页正文全文高：" + document.body.scrollHeight);
+		console.log("网页被卷去的高：" + document.body.scrollTop);
+		console.log("网页被卷去的左：" + document.body.scrollLeft);
+		console.log("网页正文部分上：" + window.screenTop);
+		console.log("网页正文部分左：" + window.screenLeft);
+		console.log("屏幕分辨率的高：" + window.screen.height);
+		console.log("屏幕分辨率的宽：" + window.screen.width);
+		console.log("屏幕可用工作区高度：" + window.screen.availHeight);
+		console.log("屏幕可用工作区宽度：" + window.screen.availWidth);
+	}
+</script>
