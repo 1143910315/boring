@@ -73,13 +73,6 @@
 </html>
 <script type="text/javascript">
 	(function () {
-		var gameInfo = new Vue({
-			el: "#gameInfo",
-			data: {
-				life: 3,
-				score: 0
-			}
-		});
 		var resize = function (e) {
 			var game = $("#game");
 			var min = Math.min(game.parent().width(), game.parent().height());
@@ -97,7 +90,6 @@
 		y: 250
 	}
 	class qiu {
-
 		constructor(x, y, r, right, bottom) {
 			this.x = x || 0;
 			this.y = y || 0;
@@ -146,7 +138,7 @@
 	}
 	var ctx = game.getContext("2d");
 	var qiuList = [];
-	
+
 	qiuList.push(new qiu(250, 250, 5, 1, 1));
 	var drawing = function () {
 		for (let i = 0; i < qiuList.length; i++) {
@@ -184,10 +176,10 @@
 			var q = new qiu(Math.random() * 500, Math.random() * 500, Math.random() * 15 + 5, Math.random() * 4 - 2, Math.random() *
 				4 - 2);
 			var qBounds = q.getBounds();
-			creating=false;
+			creating = false;
 			for (var i = 0; i < qiuList.length; i++) {
-				if(checkImpact(qiuList[i].getBounds(),qBounds)!=-1){
-					creating=true;
+				if (checkImpact(qiuList[i].getBounds(), qBounds) != -1) {
+					creating = true;
 					break;
 				}
 			}
@@ -195,10 +187,11 @@
 		while (creating);
 		qiuList.push(q);
 	}
-	for (var i = 0; i < 20; i++) {
+	for (var i = 0; i < 30; i++) {
 		create();
 	}
 	var beforeCollide = function (b1, s1, b2, s2) {
+		
 		var radian = Math.atan2(b1.y - b2.y, b2.x - b1.x);
 		var h1 = s1.right * Math.cos(radian) - s1.bottom * Math.sin(radian);
 		var h2 = s2.right * Math.cos(radian - Math.PI) - s2.bottom * Math.sin(radian - Math.PI);
@@ -223,6 +216,9 @@
 		var m2 = Math.PI * b2.r * b2.r;
 		var vx = s1.right;
 		var vy = s1.bottom;
+		var initial_kinetic_energy = m1 * (s1.right ** 2 + s1.bottom ** 2) / 2 + m2 * (s2.right ** 2 + s2.bottom ** 2) / 2;
+		var initial_momentum = m1 * Math.sqrt(s1.right ** 2 + s1.bottom ** 2) + m2 * Math.sqrt(s2.right ** 2 + s2.bottom **
+			2);
 		s1.right = ((m1 - m2) * vx + 2 * m2 * s2.right) / (m1 + m2);
 		s1.bottom = ((m1 - m2) * vy + 2 * m2 * s2.bottom) / (m1 + m2);
 		s2.right = (2 * m1 * vx + (m2 - m1) * s2.right) / (m1 + m2);
@@ -231,6 +227,12 @@
 		b1.y += s1.bottom * ratio;
 		b2.x += s2.right * ratio;
 		b2.y += s2.bottom * ratio;
+		var end_kinetic_energy = m1 * (s1.right ** 2 + s1.bottom ** 2) / 2 + m2 * (s2.right ** 2 + s2.bottom ** 2) / 2;
+		var end_momentum = m1 * Math.sqrt(s1.right ** 2 + s1.bottom ** 2) + m2 * Math.sqrt(s2.right ** 2 + s2.bottom ** 2);
+		console.log("kinetic_energy");
+		console.log(Math.abs(initial_kinetic_energy - end_kinetic_energy) < 0.1);
+		console.log("momentum");
+		console.log(Math.abs(initial_momentum - end_momentum) < 100);
 		// 		var v10 = Math.sqrt(s1.right ** 2 + s1.bottom ** 2);
 		// 		var v20 = Math.sqrt(s2.right ** 2 + s2.bottom ** 2);
 		// 		var v1 = ((m1 - m2) * v10 + 2 * m2 * v20) / (m1 + m2);
@@ -248,12 +250,12 @@
 	var render = function () {
 		var mBounds = qiuList[0].getBounds();
 		var mStatus = qiuList[0].getStatus();
-		var dd = 10 * Math.sqrt((mouse.x - mBounds.x) ** 2 + (mouse.y - mBounds.y) ** 2);
-		if (dd!=0) {			
+		var dd = 30 * Math.sqrt((mouse.x - mBounds.x) ** 2 + (mouse.y - mBounds.y) ** 2);
+		if (dd != 0) {
 			mStatus.right += (mouse.x - mBounds.x) / dd;
 			mStatus.bottom += (mouse.y - mBounds.y) / dd;
 		}
-		mBounds.r = 10;
+		//mBounds.r = 10;
 		qiuList[0].setStatus(mStatus);
 		qiuList[0].setBounds(mBounds);
 		for (let q of qiuList) {

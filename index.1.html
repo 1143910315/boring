@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.js" type="text/javascript" charset="utf-8"></script>
+	<title>无标题文档</title>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+
+		html {
+			font-size: 20px;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+		body {
+			display: flex;
+			flex-direction: column;
+			height: 100%;
+		}
+
+		#gameInfo {
+			display: flex;
+			justify-content: space-around;
+			align-items: center;
+			width: 100%;
+		}
+
+		#gameInfo .life {
+			vertical-align: middle;
+			font-size: 1.2rem;
+		}
+
+		#gameInfo .score {
+			font-size: 1.2rem;
+		}
+
+		#gameInfo img {
+			width: 1rem;
+		}
+
+		.cv {
+			flex-grow: 1;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="gameInfo">
+		<div class="life">
+			<img src="img/life.jpg">{{life}}</div>
+		<h1>游戏</h1>
+		<div class="score">{{score}}</div>
+	</div>
+	<div class="cv">
+		<canvas id="game" width="500px" height="500px"></canvas>
+	</div>
+</body>
+
+</html>
+<script type="text/javascript">
+	(function () {
+		var resize = function (e) {
+			var game = $("#game");
+			var min = Math.min(game.parent().width(), game.parent().height());
+			game.width(min - 10);
+			game.height(min - 10);
+		};
+		resize();
+		$(window).resize(function (e) {
+			resize();
+		});
+
+	})();
+	var mouse = {
+		x: 250,
+		y: 250
+	}
+	class point {
+		constructor(x, y, right, bottom) {
+			this.x = x || 0;
+			this.y = y || 0;
+			this.right = right || 0;
+			this.bottom = bottom || 0;
+			this.color = "#000000";
+		}
+		draw(ctx) {
+			ctx.strokeStyle = this.color;
+			ctx.globalAlpha = 1;
+			ctx.beginPath();
+			ctx.rect(this.x, this.y, 1, 1);
+			ctx.stroke();
+			ctx.closePath();
+		}
+		getBounds() {
+			return {
+				x: this.x,
+				y: this.y
+			};
+		}
+		setBounds(e) {
+			this.x = e.x;
+			this.y = e.y;
+		}
+		getStatus() {
+			return {
+				right: this.right,
+				bottom: this.bottom
+			};
+		}
+		setStatus(e) {
+			this.right = e.right;
+			this.bottom = e.bottom;
+		}
+	}
+	var ctx = game.getContext("2d");
+	var pointList = [];
+
+	pointList.push(new point(250, 250, 1, 1));
+	var drawing = function () {
+		ctx.globalAlpha = 1;
+		ctx.fillStyle = "#FFFFFF";
+		ctx.fillRect(0, 0, 500, 500);
+		for (let i = 0; i < pointList.length-1; i++) {
+			for (let j = i+1; j < pointList.length; j++) {
+				let bound1=pointList[i].getBounds();
+				let bound2=pointList[j].getBounds();
+				if (checkImpact(bound1,bound2,30)!=-1) {
+					ctx.globalAlpha = 0.8;
+					ctx.strokeStyle = "#7FBFFF";
+					ctx.beginPath();
+					ctx.moveTo(bound1.x, bound1.y);
+					ctx.lineTo(bound2.x, bound2.y)
+					ctx.stroke();
+					ctx.closePath();
+				}else if (checkImpact(bound1,bound2,60)!=-1) {
+					ctx.globalAlpha = 0.8;
+					ctx.strokeStyle = "#FFBF7F";
+					ctx.beginPath();
+					ctx.moveTo(bound1.x, bound1.y);
+					ctx.lineTo(bound2.x, bound2.y)
+					ctx.stroke();
+					ctx.closePath();
+				}
+			}
+		}
+		for (let i = 0; i < pointList.length; i++) {
+			pointList[i].draw(ctx);
+		}
+	}
+	var checkImpact = function (b1, b2, r) {
+		var h = Math.abs(b1.x - b2.x);
+		var v = Math.abs(b1.y - b2.y);
+		var d = Math.sqrt(h * h + v * v);
+		if (d > r) {
+			//未碰撞
+			return -1;
+		} else if (d == r) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
+	for (var i = 0; i < 2; i++) {
+		var p = new point(Math.random() * 500, Math.random() * 500, Math.random() * 4 - 2, Math.random() * 4 - 2);
+		pointList.push(p);
+	}
+	var render = function () {
+		for (let p of pointList) {
+			let status = p.getStatus();
+			//status.right += (Math.random() - 0.5)*0.001;
+			//status.bottom += (Math.random() - 0.5)*0.001;
+			p.setStatus(status);
+		}
+		for (let i = 0; i < pointList.length-1; i++) {
+			for (let j = i+1; j < pointList.length; j++) {
+				let b1 = pointList[i].getBounds();
+				let s1 = pointList[i].getStatus();
+				let b2 = pointList[j].getBounds();
+				let s2 = pointList[j].getStatus();
+				let h = Math.abs(b1.x - b2.x);
+				let v = Math.abs(b1.y - b2.y);
+				let d = Math.sqrt(h * h + v * v);
+				var ratio=0.01;
+				//s1.right*=0.99999;
+				//s1.bottom*=0.99999;
+				//s2.right*=0.99999;
+				//s2.bottom*=0.99999;
+				if (d<30 && i!=0) {
+					if (b1.x>b2.x) {
+						s1.right+=h/d*ratio;
+						s2.right-=h/d*ratio;
+					} else{
+						s1.right-=h/d*ratio;
+						s2.right+=h/d*ratio;
+					}
+					if (b1.y>b2.y) {
+						s1.bottom+=v/d*ratio;
+						s2.bottom-=v/d*ratio;
+					} else{
+						s1.bottom-=v/d*ratio;
+						s2.bottom+=v/d*ratio;
+					}
+				}
+				if ((d>30&&d<60) || (d<=30 && i==0)) {
+					if (b1.x<b2.x) {
+						s1.right+=h/d*ratio;
+						s2.right-=h/d*ratio;
+					} else{
+						s1.right-=h/d*ratio;
+						s2.right+=h/d*ratio;
+					}
+					if (b1.y<b2.y) {
+						s1.bottom+=v/d*ratio;
+						s2.bottom-=v/d*ratio;
+					} else{
+						s1.bottom-=v/d*ratio;
+						s2.bottom+=v/d*ratio;
+					}
+				}
+				pointList[i].setStatus(s1);
+				pointList[j].setStatus(s2);
+			}
+		}
+		var mBounds = pointList[0].getBounds();
+		var mStatus = pointList[0].getStatus();
+		mBounds.x=mouse.x;
+		mBounds.y=mouse.y;
+		mStatus.right = 0;
+		mStatus.bottom = 0;
+		pointList[0].setStatus(mStatus);
+		pointList[0].setBounds(mBounds);
+		for (let p of pointList) {
+			let bounds = p.getBounds();
+			let status = p.getStatus();
+			bounds.x += status.right;
+			bounds.y += status.bottom;
+			p.setBounds(bounds);
+			if (bounds.x < 0){
+				status.right = Math.abs(status.right);
+			}
+			if (bounds.x > 500){
+				status.right = -Math.abs(status.right);
+			}
+			if (bounds.y < 0){
+				status.bottom = Math.abs(status.bottom);
+			}
+			if (bounds.y > 500){
+				status.bottom = -Math.abs(status.bottom);
+			}
+			p.setStatus(status);
+		}
+	}
+	var imax=1;
+	var re = function () {
+		for (let i = 0; i < imax; i++) {
+			render();
+			drawing();
+			ctx.strokeStyle = "#000000";
+			ctx.globalAlpha = 1;
+			ctx.strokeRect(1, 1, 498, 498);
+		}
+		requestAnimationFrame(re);
+	}
+	requestAnimationFrame(re);
+	$("#game").mousemove(function (e) {
+		mouse.x = e.offsetX * 500 / $("#game").width();
+		mouse.y = e.offsetY * 500 / $("#game").height();
+	});
+
+	function log() {
+		console.log("网页可见区域宽：" + document.body.clientWidth);
+		console.log("网页可见区域高：" + document.body.clientHeight);
+		console.log("网页可见区域宽：" + document.body.offsetWidth);
+		console.log("网页可见区域高：" + document.body.offsetHeight);
+		console.log("网页正文全文宽：" + document.body.scrollWidth);
+		console.log("网页正文全文高：" + document.body.scrollHeight);
+		console.log("网页被卷去的高：" + document.body.scrollTop);
+		console.log("网页被卷去的左：" + document.body.scrollLeft);
+		console.log("网页正文部分上：" + window.screenTop);
+		console.log("网页正文部分左：" + window.screenLeft);
+		console.log("屏幕分辨率的高：" + window.screen.height);
+		console.log("屏幕分辨率的宽：" + window.screen.width);
+		console.log("屏幕可用工作区高度：" + window.screen.availHeight);
+		console.log("屏幕可用工作区宽度：" + window.screen.availWidth);
+	}
+	function all() {
+		var r=0;
+		var b=0;
+		var v=0;
+		var n=0;
+		for (let p of pointList) {
+			let status = p.getStatus();
+			r+=status.right;
+			b+=status.bottom;
+			v=v*n;
+			v+=Math.sqrt(status.right*status.right,status.bottom*status.bottom);
+			n++;
+			v=v/n;
+		}
+		console.log({r:r,b:b,v:v});
+	}
+</script>
